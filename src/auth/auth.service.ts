@@ -19,7 +19,7 @@ export class AuthService {
             if(await this.userModel.findOne({email: user.email}) ){
                 throw new NotAcceptableException("Invlaid Credientials");
             }
-            const newUser =  new this.userModel({name:user.name, password:user.password, email:user.email}).save();
+            const newUser =  new this.userModel({name:user.name, password:user.password, email:user.email, isAdmin: user.isAdmin}).save();
           
               return {
                 user: user,
@@ -58,6 +58,15 @@ export class AuthService {
                success : false
              };
            }
+    }
+
+    async signout(res: Response) {
+      res.clearCookie('token');
+      return res.send({ message: 'Logged out succefully', succuess:true });
+    }
+
+    async getUser(){
+      return this.userModel.find();
     }
 
     private async validateUser(email:string, password: string){

@@ -5,6 +5,7 @@ export const UserSchema = new mongoose.Schema(
         name: {type: String, index:{required: true}},
         email: {type: String, index:{required: true, unique: true}},
         password: {type: String, index:{required: true}},
+        isAdmin:{type:Boolean, index:{required: true}}
     }
 )
 

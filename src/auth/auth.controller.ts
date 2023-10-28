@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { JwtAuthGuard } from './jwt.guard';
 
 
 @Controller('auth')
@@ -20,7 +21,7 @@ export class AuthController {
         @Body("email") email: string,
     ){
         const hashedPassword = await bcrypt.hash(password,12);
-        return await this.authService.signup({name, email, password:hashedPassword});
+        return await this.authService.signup({name, email, password:hashedPassword, isAdmin:false});
     }
 
   @Post("signin")
@@ -37,6 +38,17 @@ export class AuthController {
   catch(e){
       return e;
   }
+  }
+
+  @Get('signout')
+  signout( @Res() res: Response) {
+    return this.authService.signout(res);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("user")
+  getUser(){
+    return this.authService.getUser();
   }
   
 }
