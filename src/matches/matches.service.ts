@@ -6,6 +6,7 @@ import { TeamDto } from './dto/team.dto';
 import { MatchDto } from './dto/match.dto';
 import { DetailsDto } from './dto/details.dto';
 import { ObjectId } from 'mongodb';
+import { Request } from 'express';
 
 
 @Injectable()
@@ -16,6 +17,7 @@ export class MatchesService {
         @InjectModel("Match") private readonly matchModel: Model<any>,
         @InjectModel("Team") private readonly teamModel: Model<any>,
         @InjectModel("Details") private readonly detailsModel: Model<any>,
+        @InjectModel("Betting") private readonly bettingModel: Model<any>,
     ){}
 
     getYearAndMonth(dateString) {
@@ -116,6 +118,7 @@ export class MatchesService {
             const result = []
             for(let i = 0; i < matches.length; i++){
                 const data = {
+                    matchId: matchesDetail[i]._id,
                     stadium: matchesDetail[i].stadium,
                     year_month : this.getYearAndMonth(matchesDetail[i].time),
                     dayDateMonth: this.getDayDateMonth(matchesDetail[i].time),
@@ -160,6 +163,44 @@ export class MatchesService {
             return {
                 success: false,
                 message: e
+            }
+        }
+    }
+
+    async makeBetting(userId:string, matchId : string, prediction : string, amount: string){
+        try{
+            const betting = await new this.bettingModel({
+                userId,
+                matchId,
+                prediction,
+                amount
+            }).save();
+            return {
+                message:betting,
+                success: true
+            }
+        }catch(e){
+            return {
+                message: e,
+                success: false
+            }
+        }
+
+    }
+
+    async isBetted(userId: string, matchId:string){
+        try{
+            const res = await this.bettingModel.findOne({userId, matchId});
+            if(res){
+                return {
+                    success: true,
+                    data: res.prediction
+                }
+            }
+        }catch(e){
+            return{
+                success:false,
+                message:e
             }
         }
     }

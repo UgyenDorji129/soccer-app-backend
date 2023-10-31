@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { TeamDto } from './dto/team.dto';
 import { MatchDto } from './dto/match.dto';
@@ -10,7 +10,7 @@ import { JwtAuthGuard } from 'src/auth/jwt.guard';
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
   
-  
+
   @Post("match")
   addMatch(
     @Body("teamOne") teamOne: TeamDto,
@@ -23,16 +23,32 @@ export class MatchesController {
     return this.matchesService.createMatch(teamOne, teamTwo, match, details, playerOne, playerTwo);
   }
 
-
   @Get("allmatches")
   getAllMatches(){
     return this.matchesService.getAllMatches();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get("match/:id")
   getMatchById(@Param() id: string){
     return this.matchesService.getMatchById(id);
+  }
+
+  @Post("/bettings")
+  makeBetting(
+    @Req() req:any,
+    @Body("matchId") matchId: string,
+    @Body("prediction") prediction : string,
+    @Body("amount") amount :  string
+  ){
+    return this.matchesService.makeBetting(req.userId, matchId, prediction, amount);
+  }
+
+  @Post("/isBetted")
+  isBetted(
+    @Req() req:any,
+    @Body("matchId") matchId: string,
+  ){
+    return this.matchesService.isBetted(req.userId, matchId);
   }
 
 

@@ -50,6 +50,7 @@ export class AuthService {
           res.cookie('adminToken', token, {});
         }else{
           res.cookie('token', token, {});
+          res.cookie('userId',user._id.toString())
         }
         return res.send({
           id: token,
