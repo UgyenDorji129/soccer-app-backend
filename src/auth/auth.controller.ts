@@ -34,10 +34,12 @@ export class AuthController {
   ){
     try{
       return await this.authService.signin(email, isAdmin, password, res);
-  }
-  catch(e){
-      return e;
-  }
+    }catch(e){
+      return {
+        message:"hello",
+        success:false
+      }
+    }
   }
 
   @Get('signout')

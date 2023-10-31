@@ -17,9 +17,9 @@ export class AuthService {
         
         try{
             if(await this.userModel.findOne({email: user.email}) ){
-                throw new NotAcceptableException("Invlaid Credientials");
+                throw new NotAcceptableException("Email found");
             }
-            const newUser =  new this.userModel({name:user.name, password:user.password, email:user.email, isAdmin: user.isAdmin}).save();
+            const newUser =  new this.userModel({name:user.name, password:user.password, email:user.email, isAdmin: false}).save();
           
               return {
                 user: user,
@@ -34,34 +34,39 @@ export class AuthService {
         }
     }
 
-    async signin(email: string, isAdmin: boolean, password: string, res: Response){
-        try{
-            const user = await this.validateUser(email, password);
-            const token = await this.signToken({
-                userId: user._id.toString(),
-                email: user.email,
-              });
-          
-              if (!token) {
-                throw new ForbiddenException('Could not signin');
-              }
-          
-            res.cookie('token', token, {});
-            return  res.send({
-                id: token,
-                success : true
-            });
-           }
-           catch(e){
-             return {
-               message : e,
-               success : false
-             };
-           }
+    async signin(email: string, isAdmin: boolean, password: string, res: Response) {
+      try {
+        const user = await this.validateUser(email, password, isAdmin);
+        const token = await this.signToken({
+          userId: user._id.toString(),
+          email: user.email,
+        });
+    
+        if (!token) {
+          throw new ForbiddenException('Could not sign in');
+        }
+    
+        if(isAdmin){
+          res.cookie('adminToken', token, {});
+        }else{
+          res.cookie('token', token, {});
+        }
+        return res.send({
+          id: token,
+          success: true
+        });
+      } catch (e) {
+        return res.send({
+          message: e,
+          success: false
+        });
+      }
     }
+    
 
     async signout(res: Response) {
       res.clearCookie('token');
+      res.clearCookie('adminToken')
       return res.send({ message: 'Logged out succefully', succuess:true });
     }
 
@@ -69,13 +74,13 @@ export class AuthService {
       return this.userModel.find();
     }
 
-    private async validateUser(email:string, password: string){
+    private async validateUser(email:string, password: string, isAdmin: boolean){
           
         const foundUser = await this.userModel.findOne({email});
         if(!foundUser){
           throw new NotFoundException("Invalid creditential")
         }
-        if (await bcrypt.compare(password,foundUser.password)) {
+        if (await bcrypt.compare(password,foundUser.password) && foundUser.isAdmin === isAdmin) {
           return foundUser;
         }
     

@@ -4,8 +4,8 @@ export const TeamSchema = new mongoose.Schema(
     {
         name: {type: String, index:{required: true}},
         logo:{type:String, index:{required:true}},
-        playerId:{type: mongoose.Schema.Types.ObjectId, ref: "Player"}
+        team:{type:String, index:{required:true}},
     }
 )
 
-export const user = mongoose.model("team", TeamSchema)
+export const team = mongoose.model("team", TeamSchema)
