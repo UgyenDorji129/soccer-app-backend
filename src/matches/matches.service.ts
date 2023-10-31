@@ -18,6 +18,7 @@ export class MatchesService {
         @InjectModel("Team") private readonly teamModel: Model<any>,
         @InjectModel("Details") private readonly detailsModel: Model<any>,
         @InjectModel("Betting") private readonly bettingModel: Model<any>,
+        @InjectModel("Ticket") private readonly ticketModel: Model<any>,
     ){}
 
     getYearAndMonth(dateString) {
@@ -195,6 +196,40 @@ export class MatchesService {
                 return {
                     success: true,
                     data: res.prediction
+                }
+            }
+        }catch(e){
+            return{
+                success:false,
+                message:e
+            }
+        }
+    }
+
+    async makeBooking(userId:string, matchId:string){
+        try{
+            const booking = await new this.ticketModel({
+                userId,
+                matchId
+            }).save();
+            return {
+                message:booking,
+                success: true
+            }
+        }catch(e){
+            return {
+                message: e,
+                success: false
+            }
+        }
+    }
+
+    async isBooked(userId: string, matchId:string){
+        try{
+            const res = await this.ticketModel.findOne({userId, matchId});
+            if(res){
+                return {
+                    success: true,
                 }
             }
         }catch(e){

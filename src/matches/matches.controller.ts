@@ -51,5 +51,20 @@ export class MatchesController {
     return this.matchesService.isBetted(req.userId, matchId);
   }
 
+  @Post("/booking")
+  makeBooking(
+    @Req() req:any,
+    @Body("matchId") matchId: string,){
+    return this.matchesService.makeBooking(req.userId, matchId);
+  }
+
+  @Post("/isBooked")
+  isBooked(
+    @Req() req:any,
+    @Body("matchId") matchId: string,
+  ){
+    return this.matchesService.isBooked(req.userId, matchId);
+  }
+
 
 }
